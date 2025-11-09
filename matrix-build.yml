@@ -1,0 +1,39 @@
+name: CI — Matrix build with artifacts
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch: {}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.9', '3.10', '3.11']
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: matrix-7d8f6c1
+        run: |
+          echo "Building for Python ${GITHUB_MATRIX_PYTHON_VERSION:-${{ matrix.python-version }}}"
+
+      - name: Generate build artifact
+        id: gen
+        run: |
+          VARIANT=${{ matrix.python-version }}
+          echo "Build output for python-${VARIANT}" > build-output-${VARIANT}.txt
+          echo "variant=${VARIANT}" >> build-output-${VARIANT}.txt
+          ls -l build-output-${VARIANT}.txt
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-7d8f6c1-python-${{ matrix.python-version }}
+          path: build-output-${{ matrix.python-version }}.txt
